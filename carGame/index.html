@@ -1,0 +1,127 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>Car Game</title>
+</head>
+
+<body>
+    <canvas id="gameboard" width="400" height="400" style="margin: 4em"></canvas>
+</body>
+<script>
+    var canvas = document.getElementById('gameboard');
+    var ctx = canvas.getContext('2d');
+
+    // function draw(x,y) {
+    //     ctx.beginPath();
+    //     ctx.clearRect(0,0,400,400);
+    //     ctx.arc(x,y, 20, 0, 2*Math.PI);
+    //     ctx.stroke();
+    //     ctx.closePath();
+    // }
+
+    // var x = 40;
+    // var y = 40;
+    // setInterval(function(){
+    //     draw(x++ % 380, y++ % 380);
+    // }, 10);
+
+    function Car(x, y, isMoveable, board) {
+        this.x = x;
+        this.y = y;
+        this.isMoveable = isMoveable;
+        this.board = board;
+        this.img = new Image();
+        this.img.src = "car.png";
+        this.speed = 10;
+        if (isMoveable) {
+            document.onkeydown = (e) => {
+                switch (e.keyCode) {
+                    case 38:
+                        this.move(0,-1*this.speed);
+                        break;
+                    case 40:
+                        this.move(0,1*this.speed);
+                        break;
+                    case 37:
+                        // this.move(-1*this.speed,0);
+                        break;
+                    case 39:
+                        // this.move(1*this.speed,0);
+                        break;
+                }
+            }
+        }
+    }
+
+    Car.prototype.draw = function () {
+        ctx.beginPath();
+        ctx.drawImage(this.img, this.x-10, this.y-10, 20, 20);
+        // ctx.stroke();
+        ctx.closePath();
+    }
+    Car.prototype.move = function (dx, dy) {
+        var x = (this.x + dx) % 380;
+        var y = (this.y + dy) % 380;
+        if (!this.board.checkObstacle(x,y)) {
+            this.x = x;
+            this.y = y;
+        }
+    }
+
+    // var myCar = new Car(40, 40, true);
+    // var yourCar = new Car(120, 80);
+    // myCar.draw();
+    // yourCar.draw();
+
+    function Obstacle () {
+        this.x = Math.floor(Math.random()* 361)+20;
+        this.y = Math.floor(Math.random()* 361)+20;
+        this.img = new Image();
+        this.img.src = "bomb.png";
+    }
+    Obstacle.prototype.draw = function() {
+        // ctx.fillRect(this.x -10, this.y -10, 20, 20);
+        ctx.drawImage(this.img, this.x-10, this.y-10, 20,20);
+    }
+
+    function Board () {
+        this.car = new Car(40, 40, true, this);
+        this.liste_obstacles = [];
+        for (var i = 0; i < 10; i++) {
+            this.liste_obstacles.push(new Obstacle());
+        }
+        this.liste_obstacles = this.liste_obstacles.filter((obstacle) => {
+            return Math.abs(this.car.x - obstacle.x) > 20 || Math.abs(this.car.y - obstacle.y) > 20
+        })
+        this.img = new Image();
+        this.img.src = "background.jpg";
+        this.imgOffset = 0;
+        this.imgOffset2 = 400;
+        setInterval(() => {
+            this.imgOffset = (this.imgOffset < -400) ? 400-20 : (this.imgOffset -10);
+            this.imgOffset2 = (this.imgOffset2 < -400) ? 400-20 : (this.imgOffset2 -10);
+            ctx.clearRect(0, 0, 400, 400);
+            ctx.drawImage(this.img, this.imgOffset, 0, 400,400);
+            ctx.drawImage(this.img, this.imgOffset2, 0, 400,400);
+            this.car.move(0, 4);
+            this.car.draw();
+            this.liste_obstacles.forEach(function(obstacle) {
+                obstacle.draw();
+            })
+        }, 100);
+    }
+
+    Board.prototype.checkObstacle = function (x,y){
+        return this.liste_obstacles.filter((obstacle) => {
+            return Math.abs(x - obstacle.x) < 20 && Math.abs(y - obstacle.y) < 20
+        }).length > 0;
+    }
+    var board = new Board()
+;
+</script>
+
+</html>

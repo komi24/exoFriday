@@ -43,7 +43,27 @@ $(document).ready(function(){
   document.getElementById('memory_board').innerHTML = html;
   // Bind the click event of each element to a function
 $('.back').on('click', function () {
-   
+   $(this).hide()
+   $(this).parent().find('.front').addClass('back');
+   if (memoryGame.pickedCards.length === 0) {
+     // If it is the first card that I pick
+      memoryGame.pickedCards.push($(this).attr('name'))
+   } else {
+     // If there already is a card in pickedCards
+     if (memoryGame.checkIfPair(memoryGame.pickedCards[0], $(this).attr('name'))) {
+       memoryGame.pickedCards = [];
+       memoryGame.finished();
+     } else {
+       setTimeout(() => {
+        $(this).show()
+        $(this).parent().find('.front').removeClass('back');
+        $(`[name="${memoryGame.pickedCards[0]}"]`).show()
+        $(`[name="${memoryGame.pickedCards[0]}"]`).parent().find('.front').removeClass('back');
+        memoryGame.pickedCards = [];
+       }, 1000)
+     }
+
+   }
 });
 });
 
